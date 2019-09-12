@@ -1,7 +1,8 @@
-from fastai.vision import *
-from lovasz_loss import *
-
 __all__ = ["dice_loss", "lovasz_softmax", "lovasz_hinge"]
+
+from fastai.vision import *
+from .lovasz_loss import *
+
 
 def dice_loss(input, target):
     "binary dice loss"

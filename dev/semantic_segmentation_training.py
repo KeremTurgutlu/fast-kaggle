@@ -3,11 +3,11 @@ from fastai.distributed import *
 from fastai.script import *
 from fastai.utils.mem import *
 
-from datasets import *
-import metrics
-import losses
-from optimizers import *
-from misc import *
+from local.semantic_segmentation.datasets import *
+from local.semantic_segmentation import metrics
+from local.semantic_segmentation import losses
+from local.misc import *
+from local.optimizers import *
 
 # Train and save model
 

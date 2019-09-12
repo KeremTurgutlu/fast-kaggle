@@ -15,7 +15,7 @@ try:
 except ImportError: # py3k
     from itertools import  filterfalse as ifilterfalse
 
-__all__ = ["lovasz_softmax"]
+__all__ = ["lovasz_softmax", "lovasz_hinge"]
 
 def lovasz_grad(gt_sorted):
     """
