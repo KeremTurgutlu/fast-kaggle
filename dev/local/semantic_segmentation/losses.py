@@ -1,5 +1,5 @@
 from fastai.vision import *
-from lovasz_loss import *
+from .lovasz_loss import *
 
 __all__ = ["dice_loss", "lovasz_softmax", "lovasz_hinge"]
 
