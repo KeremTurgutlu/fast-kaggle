@@ -4,13 +4,7 @@ __all__ = ['foreground_acc', 'iou', 'multilabel_dice', 'multilabel_iou']
 
 #Cell
 from fastai.vision import *
-
-#Cell
-def foreground_acc(input, target, void_code)->Rank0Tensor:
-    "Accuracy excluding background pixels"
-    target = target.squeeze(1)
-    mask = target != void_code
-    return (input.argmax(dim=1)[mask]==target[mask]).float().mean()
+from fastai.metrics import foreground_acc
 
 #Cell
 def iou(input: torch.Tensor, targs: torch.Tensor)->Rank0Tensor:
