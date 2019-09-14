@@ -1,4 +1,18 @@
 {
-  "dummy_func": "00_testing_notebook_export.ipynb",
-  "SemanticSegmentationData": "10_segmentation_dataset.ipynb"
+  "test_fail": "00_test.ipynb",
+  "test": "00_test.ipynb",
+  "nequals": "00_test.ipynb",
+  "test_eq": "00_test.ipynb",
+  "test_eq_type": "00_test.ipynb",
+  "test_ne": "00_test.ipynb",
+  "is_close": "00_test.ipynb",
+  "test_close": "00_test.ipynb",
+  "test_is": "00_test.ipynb",
+  "test_shuffled": "00_test.ipynb",
+  "test_stdout": "00_test.ipynb",
+  "TEST_IMAGE": "00_test.ipynb",
+  "test_fig_exists": "00_test.ipynb",
+  "iou": "12_segmentation_metrics.ipynb",
+  "multilabel_dice": "12_segmentation_metrics.ipynb",
+  "multilabel_iou": "12_segmentation_metrics.ipynb"
 }
