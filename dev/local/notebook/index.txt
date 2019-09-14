@@ -1,4 +1,5 @@
 {
   "dummy_func": "00_testing_notebook_export.ipynb",
-  "SemanticSegmentationData": "10_segmentation_dataset.ipynb"
+  "SemanticSegmentationData": "10_segmentation_dataset.ipynb",
+  "dice_loss": "11_segmentation_losses.ipynb"
 }
