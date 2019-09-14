@@ -3,7 +3,7 @@ from fastai.distributed import *
 from fastai.script import *
 from fastai.utils.mem import *
 
-from local.semantic_segmentation.datasets import *
+from local.semantic_segmentation.dataset import *
 from local.semantic_segmentation import metrics
 from local.semantic_segmentation import losses
 from local.misc import *
