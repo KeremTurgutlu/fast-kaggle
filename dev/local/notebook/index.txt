@@ -11,5 +11,8 @@
   "test_shuffled": "00_test.ipynb",
   "test_stdout": "00_test.ipynb",
   "TEST_IMAGE": "00_test.ipynb",
-  "test_fig_exists": "00_test.ipynb"
+  "test_fig_exists": "00_test.ipynb",
+  "iou": "12_segmentation_metrics.ipynb",
+  "multilabel_dice": "12_segmentation_metrics.ipynb",
+  "multilabel_iou": "12_segmentation_metrics.ipynb"
 }
