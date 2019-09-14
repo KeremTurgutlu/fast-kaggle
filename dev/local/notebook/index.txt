@@ -1,5 +1,9 @@
 {
   "dummy_func": "00_testing_notebook_export.ipynb",
   "SemanticSegmentationData": "10_segmentation_dataset.ipynb",
-  "dice_loss": "11_segmentation_losses.ipynb"
+  "dice_loss": "11_segmentation_losses.ipynb",
+  "foreground_acc": "12_segmentation_metrics.ipynb",
+  "iou": "12_segmentation_metrics.ipynb",
+  "multilabel_dice": "12_segmentation_metrics.ipynb",
+  "multilabel_iou": "12_segmentation_metrics.ipynb"
 }
