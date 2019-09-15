@@ -18,5 +18,6 @@
   "run_command": "01_script.ipynb",
   "fit_const_cosanneal": "02_scheduler.ipynb",
   "fit_warm_cosanneal": "02_scheduler.ipynb",
-  "main": "13_segmentation_training.ipynb"
+  "main": "13_segmentation_training.ipynb",
+  "SaveDistributedModelCallback": "03_distributed.ipynb"
 }
