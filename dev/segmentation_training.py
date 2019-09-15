@@ -78,7 +78,7 @@ def main(
 
     # callbacks
     learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric, 
-                                      mode="max", name=model_name))
+                                      mode="max", name=model_name, gpu=gpu))
         
     # optimizer / scheduler
     alpha=0.99; mom=0.9; eps=1e-8
