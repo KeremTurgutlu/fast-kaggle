@@ -15,7 +15,8 @@
   "iou": "12_segmentation_metrics.ipynb",
   "multilabel_dice": "12_segmentation_metrics.ipynb",
   "multilabel_iou": "12_segmentation_metrics.ipynb",
-  "run_command": "01_scripting_utils.ipynb",
+  "run_command": "01_script.ipynb",
   "fit_const_cosanneal": "02_scheduler.ipynb",
-  "fit_warm_cosanneal": "02_scheduler.ipynb"
+  "fit_warm_cosanneal": "02_scheduler.ipynb",
+  "main": "13_segmentation_training.ipynb"
 }
