@@ -1,4 +1,4 @@
-# Always keeps this in cell index position: 1
+# Always keeps this in cell index position: 2
 from fastai.vision import *
 from fastai.distributed import *
 from fastai.script import *
@@ -51,6 +51,8 @@ def main(
         
     # Get data
     PATH = Path(PATH)
+    try: VALID = float(VALID)
+    except: pass
     ssdata = SemanticSegmentationData(PATH, IMAGES, MASKS, CODES, TRAIN, VALID, TEST, sample_size, bs, size)
     data = ssdata.get_data()
     if imagenet_pretrained: data.normalize(imagenet_stats)
@@ -131,16 +133,17 @@ def main(
     else:
         if not gpu: print("Training from scratch")
         learn.fit_one_cycle(epochs, max_lr)
-    
         
-    # save test preds 
-    if TEST:
-        preds, targs = learn.get_preds(DatasetType.Test)
+    # save valid and test preds 
+    if TEST: dtypes = ["Test", "Valid"]
+    else: dtypes = ["Valid"]
+    for dtype in dtypes:
+        if not gpu: print(f"Generating Raw Predictions for {dtype}...")
+        preds, targs = learn.get_preds(getattr(DatasetType, dtype))
         fnames = list(data.test_ds.items)
-        try_save({"fnames":fnames, 
-                  "preds":to_cpu(preds),
-                  "targs":to_cpu(targs)}, path=Path(EXPORT_PATH), file="raw_preds.pkl")
-    
+        try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
+                 path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
+
     # to_fp32 + export learn
     learn.to_fp32()    
     learn.load(model_name) # load best saved model
