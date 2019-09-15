@@ -110,7 +110,7 @@ def main(
         learn.fit_one_cycle(epochs, max_lr)
         
         # load model hack
-        best_init = learn.save_model_callback.best
+        best_init = learn.save_distributed_model_callback.best
         learn.callback_fns = [cb_fn for cb_fn in learn.callback_fns if cb_fn.func == Recorder]
         learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric, name=model_name, best_init=best_init))
 
@@ -120,7 +120,7 @@ def main(
         learn.fit_one_cycle(epochs, lrs, pct_start=0.8)
         
         # load model hack
-        best_init = learn.save_model_callback.best
+        best_init = learn.save_distributed_model_callback.best
         learn.callback_fns = [cb_fn for cb_fn in learn.callback_fns if cb_fn.func == Recorder]
         learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric, name=model_name, best_init=best_init))
 
