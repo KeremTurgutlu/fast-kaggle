@@ -9,13 +9,15 @@ from fastai.callbacks import *
 #Cell
 class SaveDistributedModelCallback(TrackerCallback):
     "SaveModelCallback modified for distributed transfer learning - remove torch.load"
-    def __init__(self, learn:Learner, monitor:str='val_loss', mode:str='auto', every:str='improvement', name:str='bestmodel', best_init=None):
+    def __init__(self, learn:Learner, monitor:str='val_loss', mode:str='auto', every:str='improvement',
+                 name:str='bestmodel', best_init=None, gpu=None):
         super().__init__(learn, monitor=monitor, mode=mode)
         self.every,self.name = every,name
         if self.every not in ['improvement', 'epoch']:
             warn(f'SaveModel every {self.every} is invalid, falling back to "improvement".')
             self.every = 'improvement'
         if best_init: self.best = best_init
+        self.gpu = gpu
 
     def on_train_begin(self, **kwargs:Any)->None:
         "Initializes the best value."
@@ -34,6 +36,6 @@ class SaveDistributedModelCallback(TrackerCallback):
         else: #every="improvement"
             current = self.get_monitor_value()
             if current is not None and self.operator(current, self.best):
-                print(f'Better model found at epoch {epoch} with {self.monitor} value: {current}.')
+                if not self.gpu: print(f'Better model found at epoch {epoch} with {self.monitor} value: {current}.')
                 self.best = current
                 self.learn.save(f'{self.name}')
