@@ -8,8 +8,8 @@ import shlex
 import datetime
 
 #Cell
-def run_command(command, write_stderr=False):
-    "Run shell command as an external process"
+def run_command(command, stderr_fn=None):
+    "Run shell command as an external process, optionally write err to stderr_fn"
     if type(command) == str: command = shlex.split(command)
     elif type(command) == list: command = command
     else: raise AssertionError("Command should be string or list")
@@ -22,9 +22,10 @@ def run_command(command, write_stderr=False):
     if rc != 0:
         stdout, stderr =  process.communicate()
         err = stderr.decode(); print(err)
-        with open("./stderr.log", "a") as f:
-            now = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-            f.write(f"\n\n\nAPPENDED NEW ERROR at: {now}\n")
-            f.write(f"COMMAND: {command}\n")
-            f.write(err)
+        if stderr_fn:
+            with open(stderr_fn, "a") as f:
+                now = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                f.write(f"\n\n\nAPPENDED NEW ERROR at: {now}\n")
+                f.write(f"COMMAND: {command}\n")
+                f.write(err)
         return rc, stderr.decode()
