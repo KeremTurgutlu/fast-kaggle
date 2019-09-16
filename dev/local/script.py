@@ -19,13 +19,15 @@ def run_command(command, stderr_fn=None):
         if output == b'' and process.poll() is not None: break
         if output: print (output.decode().strip())
     rc = process.poll()
-    if rc != 0:
-        stdout, stderr =  process.communicate()
-        err = stderr.decode(); print(err)
-        if stderr_fn:
-            with open(stderr_fn, "a") as f:
-                now = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-                f.write(f"\n\n\nAPPENDED NEW ERROR at: {now}\n")
-                f.write(f"COMMAND: {command}\n")
-                f.write(err)
-        return rc, stderr.decode()
+    stdout, stderr =  process.communicate()
+    out = stdout.decode(); print(out)
+    err = stderr.decode(); print(err)
+#     if rc != 0:
+    if stderr_fn:
+        with open(stderr_fn, "a") as f:
+            now = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+            f.write(f"\n\n\nAPPENDED NEW ERROR at: {now}\n")
+            f.write(f"COMMAND: {command}\n")
+            f.write(f"STDERR: {err}")
+            f.write(f"STDOUT: {out}")
+    return rc
