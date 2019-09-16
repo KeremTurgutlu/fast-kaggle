@@ -7,7 +7,7 @@ from fastai.utils.mem import *
 from local.segmentation.dataset import *
 from local.segmentation import metrics
 from local.segmentation import losses
-from local.distributed import *
+from local.callbacks import *
 from local.optimizers import *
 
 # https://stackoverflow.com/questions/8299270/ultimate-answer-to-relative-python-imports
@@ -26,14 +26,13 @@ def main(
     imagenet_pretrained:Param("Use imagenet weights for DynamicUnet", int)=1,
     max_lr:Param("Learning Rate", float)=3e-3,
     model_name:Param("Model name for save", str)="mybestmodel",
-    epochs:Param("""Number of max epochs to train""", int)=10,
-    tracking_metric:Param("""Which metric to use for tracking and evaluation""", str)="dice",
-    void_name:Param("""Background class name""", str)=None,
-    loss_function:Param("""Loss function for training""", str)="crossentropy",
-    opt:Param("""Optimizer for training""", str)=None,
-    arch_name:Param("""Architecture backbone for training""", str)="resnet34",
-    
-    EXPORT_PATH:Param("""Where to export trained model""", str)=".",
+    epochs:Param("Number of max epochs to train", int)=10,
+    tracking_metric:Param("Which metric to use for tracking and evaluation", str)="dice",
+    void_name:Param("Background class name", str)=None,
+    loss_function:Param("Loss function for training", str)="crossentropy",
+    opt:Param("Optimizer for training", str)=None,
+    arch_name:Param("Architecture backbone for training", str)="resnet34",
+    EXPORT_PATH:Param("Where to export trained model", str)=".",
     
     gpu:Param("GPU to run on, can handle multi gpu", str)=None):
     
@@ -79,8 +78,9 @@ def main(
     if not gpu: print(f"Training with loss: {learn.loss_func}")
 
     # callbacks
-    learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric, 
-                                      mode="max", name=model_name, gpu=gpu))
+    save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=model_name, gpu=gpu)
+    csvlog_cb = CSVLogger(learn, 'training_log', append=True)
+    cbs = [save_cb, csvlog_cb]
         
     # optimizer / scheduler
     alpha=0.99; mom=0.9; eps=1e-8
@@ -109,35 +109,23 @@ def main(
         if not gpu: print("Training with transfer learning")
         # stage-1
         learn.freeze_to(-1)
-        learn.fit_one_cycle(epochs, max_lr)
-        
-        # load model hack
-        best_init = learn.save_distributed_model_callback.best
-        learn.callback_fns = [cb_fn for cb_fn in learn.callback_fns if cb_fn.func == Recorder]
-        learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric,
-                                          name=model_name, best_init=best_init))
+        learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
 
         # stage-2
         lrs = slice(max_lr/100,max_lr/4)
         learn.freeze_to(-2)
-        learn.fit_one_cycle(epochs, lrs, pct_start=0.8)
-        
-        # load model hack
-        best_init = learn.save_distributed_model_callback.best
-        learn.callback_fns = [cb_fn for cb_fn in learn.callback_fns if cb_fn.func == Recorder]
-        learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric,
-                                          name=model_name, best_init=best_init))
-
+        learn.fit_one_cycle(epochs, lrs, pct_start=0.8, callbacks=cbs)
+ 
         # stage-3
         lrs = slice(max_lr/100,max_lr/4)
         learn.unfreeze()
-        learn.fit_one_cycle(epochs, lrs, pct_start=0.8)
+        learn.fit_one_cycle(epochs, lrs, pct_start=0.8, callbacks=cbs)
     else:
         if not gpu: print("Training from scratch")
-        learn.fit_one_cycle(epochs, max_lr)
+        learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
         
     # save valid and test preds 
-    if TEST: dtypes = ["Test", "Valid"]
+    if TEST: dtypes = ["Valid", "Test"]
     else: dtypes = ["Valid"]
     for dtype in dtypes:
         if not gpu: print(f"Generating Raw Predictions for {dtype}...")

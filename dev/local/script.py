@@ -5,9 +5,10 @@ __all__ = ['run_command']
 #Cell
 import subprocess
 import shlex
+import datetime
 
 #Cell
-def run_command(command):
+def run_command(command, write_stderr=False):
     "Run shell command as an external process"
     if type(command) == str: command = shlex.split(command)
     elif type(command) == list: command = command
@@ -15,16 +16,15 @@ def run_command(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while True:
         output = process.stdout.readline()
-        if output == b'' and process.poll() is not None:
-            break
-        if output:
-            print (output.decode().strip())
+        if output == b'' and process.poll() is not None: break
+        if output: print (output.decode().strip())
     rc = process.poll()
     if rc != 0:
         stdout, stderr =  process.communicate()
-        print(stderr.decode())
-        return "Failure"
-    else:
-        stdout, stderr =  process.communicate()
-        print(stderr.decode())
-        return "Success"
+        err = stderr.decode(); print(err)
+        with open("./stderr.log", "a") as f:
+            now = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+            f.write(f"\n\n\nAPPENDED NEW ERROR at: {now}\n")
+            f.write(f"COMMAND: {command}\n")
+            f.write(err)
+        return rc, stderr.decode()
