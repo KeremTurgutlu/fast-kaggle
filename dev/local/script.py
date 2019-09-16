@@ -5,26 +5,29 @@ __all__ = ['run_command']
 #Cell
 import subprocess
 import shlex
+import datetime
 
 #Cell
-def run_command(command):
-    "Run shell command as an external process"
+def run_command(command, stderr_fn=None):
+    "Run shell command as an external process, optionally write err to stderr_fn"
     if type(command) == str: command = shlex.split(command)
     elif type(command) == list: command = command
     else: raise AssertionError("Command should be string or list")
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while True:
         output = process.stdout.readline()
-        if output == b'' and process.poll() is not None:
-            break
-        if output:
-            print (output.decode().strip())
+        if output == b'' and process.poll() is not None: break
+        if output: print (output.decode().strip())
     rc = process.poll()
-    if rc != 0:
-        stdout, stderr =  process.communicate()
-        print(stderr.decode())
-        return "Failure"
-    else:
-        stdout, stderr =  process.communicate()
-        print(stderr.decode())
-        return "Success"
+    stdout, stderr =  process.communicate()
+    out = stdout.decode(); print(out)
+    err = stderr.decode(); print(err)
+#     if rc != 0:
+    if stderr_fn:
+        with open(stderr_fn, "a") as f:
+            now = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+            f.write(f"\n\n\nAPPENDED NEW LOG at: {now}\n")
+            f.write(f"COMMAND: {command}\n")
+            f.write(f"STDERR: {err}")
+            f.write(f"STDOUT: {out}")
+    return rc

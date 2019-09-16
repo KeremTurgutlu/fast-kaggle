@@ -19,5 +19,6 @@
   "fit_const_cosanneal": "02_scheduler.ipynb",
   "fit_warm_cosanneal": "02_scheduler.ipynb",
   "main": "13_segmentation_training.ipynb",
-  "SaveDistributedModelCallback": "03_distributed.ipynb"
+  "SaveDistributedModelCallback": "03_callbacks.ipynb",
+  "CSVLogger": "03_callbacks.ipynb"
 }
