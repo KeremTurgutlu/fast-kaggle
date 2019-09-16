@@ -26,7 +26,7 @@ def run_command(command, stderr_fn=None):
     if stderr_fn:
         with open(stderr_fn, "a") as f:
             now = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-            f.write(f"\n\n\nAPPENDED NEW ERROR at: {now}\n")
+            f.write(f"\n\n\nAPPENDED NEW LOG at: {now}\n")
             f.write(f"COMMAND: {command}\n")
             f.write(f"STDERR: {err}")
             f.write(f"STDOUT: {out}")
