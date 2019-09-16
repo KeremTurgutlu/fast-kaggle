@@ -114,7 +114,8 @@ def main(
         # load model hack
         best_init = learn.save_distributed_model_callback.best
         learn.callback_fns = [cb_fn for cb_fn in learn.callback_fns if cb_fn.func == Recorder]
-        learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric, name=model_name, best_init=best_init))
+        learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric,
+                                          name=model_name, best_init=best_init))
 
         # stage-2
         lrs = slice(max_lr/100,max_lr/4)
@@ -124,7 +125,8 @@ def main(
         # load model hack
         best_init = learn.save_distributed_model_callback.best
         learn.callback_fns = [cb_fn for cb_fn in learn.callback_fns if cb_fn.func == Recorder]
-        learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric, name=model_name, best_init=best_init))
+        learn.callback_fns.append(partial(SaveDistributedModelCallback, monitor=tracking_metric,
+                                          name=model_name, best_init=best_init))
 
         # stage-3
         lrs = slice(max_lr/100,max_lr/4)

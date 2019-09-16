@@ -22,6 +22,7 @@ class SaveDistributedModelCallback(TrackerCallback):
     def on_train_begin(self, **kwargs:Any)->None:
         "Initializes the best value."
         if not hasattr(self, 'best'):
+            print("Initializing self.best")
             self.best = float('inf') if self.operator == np.less else -float('inf')
 
     def jump_to_epoch(self, epoch:int)->None:
@@ -33,7 +34,7 @@ class SaveDistributedModelCallback(TrackerCallback):
     def on_epoch_end(self, epoch:int, **kwargs:Any)->None:
         "Compare the value monitored to its best score and maybe save the model."
         if self.every=="epoch": self.learn.save(f'{self.name}_{epoch}')
-        else: #every="improvement"
+        else:
             current = self.get_monitor_value()
             if current is not None and self.operator(current, self.best):
                 if not self.gpu: print(f'Better model found at epoch {epoch} with {self.monitor} value: {current}.')
