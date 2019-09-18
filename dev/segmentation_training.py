@@ -79,22 +79,23 @@ def main(
 
     # callbacks
     save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=model_name, gpu=gpu)
-    csvlog_cb = CSVLogger(learn, 'training_log', append=True)
+    csvlog_cb = CSVDistributedLogger(learn, 'training_log', append=True, gpu=gpu)
     cbs = [save_cb, csvlog_cb]
         
     # optimizer / scheduler
     alpha=0.99; mom=0.9; eps=1e-8
     
-    if   opt=='adam' : opt_func = partial(optim.Adam, betas=(mom,alpha), eps=eps)
-    elif opt=='radam' : opt_func = partial(RAdam, betas=(mom,alpha), eps=eps)
-    elif opt=='novograd' : opt_func = partial(Novograd, betas=(mom,alpha), eps=eps)
-    elif opt=='rms'  : opt_func = partial(optim.RMSprop, alpha=alpha, eps=eps)
-    elif opt=='sgd'  : opt_func = partial(optim.SGD, momentum=mom)
-    elif opt=='ranger'  : opt_func = partial(Ranger,  betas=(mom,alpha), eps=eps)
-    elif opt=='ralamb'  : opt_func = partial(Ralamb,  betas=(mom,alpha), eps=eps)
-    elif opt=='rangerlars'  : opt_func = partial(RangerLars,  betas=(mom,alpha), eps=eps)
-    elif opt=='lookahead'  : opt_func = partial(LookaheadAdam, betas=(mom,alpha), eps=eps)
-    elif opt=='lamb'  : opt_func = partial(Lamb, betas=(mom,alpha), eps=eps)
+    if   opt=='adam':        opt_func = partial(optim.Adam, betas=(mom,alpha), eps=eps)
+    elif opt=='radam':       opt_func = partial(RAdam, betas=(mom,alpha), eps=eps)
+    elif opt=='novograd':    opt_func = partial(Novograd, betas=(mom,alpha), eps=eps)
+    elif opt=='rms':         opt_func = partial(optim.RMSprop, alpha=alpha, eps=eps)
+    elif opt=='sgd':         opt_func = partial(optim.SGD, momentum=mom)
+    elif opt=='ranger':      opt_func = partial(Ranger,  betas=(mom,alpha), eps=eps)
+    elif opt=='ralamb':      opt_func = partial(Ralamb,  betas=(mom,alpha), eps=eps)
+    elif opt=='rangerlars':  opt_func = partial(RangerLars,  betas=(mom,alpha), eps=eps)
+    elif opt=='lookahead':   opt_func = partial(LookaheadAdam, betas=(mom,alpha), eps=eps)
+    elif opt=='lamb':        opt_func = partial(Lamb, betas=(mom,alpha), eps=eps)
+    
     if opt: learn.opt_func = opt_func
 
     # distributed
