@@ -21,5 +21,6 @@
   "main": "13_segmentation_training.ipynb",
   "SaveDistributedModelCallback": "03_callbacks.ipynb",
   "CSVLogger": "03_callbacks.ipynb",
-  "CSVDistributedLogger": "03_callbacks.ipynb"
+  "CSVDistributedLogger": "03_callbacks.ipynb",
+  "SemanticSegmentationData": "10_segmentation_dataset.ipynb"
 }

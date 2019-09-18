@@ -16,7 +16,7 @@ class SemanticSegmentationData:
         self.codes, self.VALID, self.TEST = np.loadtxt(self.path/CODES, dtype=str), VALID, TEST
 
         self.train_df = pd.read_csv(self.path/TRAIN, header=None)
-
+        if sample_size: self.train_df = self.train_df.sample(sample_size)
         if (VALID is not None) and (type(VALID) is str): self.valid_file = True
         else: self.valid_file = False
 

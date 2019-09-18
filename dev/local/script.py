@@ -22,7 +22,7 @@ def _add_dict_to_json(fn, d):
     with open(fn, "w") as f: f.write(json.dumps(l))
 
 def run_command(command, logfn=None):
-    "Run shell command as an external process, optionally write err to logfn"
+    "Run shell command as an external process, optionally write logs to logfn"
     if type(command) == str: command = shlex.split(command)
     elif type(command) == list: command = command
     else: raise AssertionError("Command should be string or list")
@@ -39,6 +39,6 @@ def run_command(command, logfn=None):
     err = stderr.decode(); print(err)
     out = "".join(stdout)
     if logfn:
-        d = {"time": _now(), "stderr":err, "stdout":out}
+        d = {"time": _now(), "command": command, "stderr":err, "stdout":out}
         _add_dict_to_json(logfn, d)
     return rc
