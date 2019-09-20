@@ -126,17 +126,20 @@ def main(
         learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
         
     # save valid and test preds 
-    if TEST: dtypes = ["Valid", "Test"]
-    else: dtypes = ["Valid"]
-    for dtype in dtypes:
-        if not gpu: print(f"Generating Raw Predictions for {dtype}...")
-        preds, targs = learn.get_preds(getattr(DatasetType, dtype))
-        fnames = list(data.test_ds.items)
-        try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
-                 path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
-
-    # to_fp32 + export learn
-    learn.to_fp32()    
-    learn.load(model_name) # load best saved model
-    if not gpu: print(f"Exporting model to: {EXPORT_PATH}")
-    learn.export(f"{model_name}_export.pkl")
+    if not gpu:
+        if TEST: dtypes = ["Valid", "Test"]
+        else: dtypes = ["Valid"]
+        for dtype in dtypes:
+            print(f"Generating Raw Predictions for {dtype}...")
+            preds, targs = learn.get_preds(getattr(DatasetType, dtype))
+            fnames = list(data.test_ds.items)
+            try_save({"fnames":fnames, "pzxreds":to_cpu(preds), "targs":to_cpu(targs)},
+                     path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
+            print(f"Done.")
+            
+#     # to_fp32 + export learn
+#     if not gpu:
+#         learn.to_fp32()    
+#         learn.load(model_name) # load best saved model
+#         print(f"Exporting model to: {EXPORT_PATH}")
+#         learn.export(f"{model_name}_export.pkl")

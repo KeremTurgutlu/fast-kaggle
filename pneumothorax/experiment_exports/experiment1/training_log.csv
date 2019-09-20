@@ -1,7 +1,6 @@
 epoch,train_loss,valid_loss,dice,time
+0,nan,nan,0.787115,13:46
 epoch,train_loss,valid_loss,dice,time
-0,0.175501,0.000258,0.571429,00:24
+0,nan,nan,0.787115,14:24
 epoch,train_loss,valid_loss,dice,time
-0,0.005567,0.024526,0.642857,00:12
-epoch,train_loss,valid_loss,dice,time
-0,0.009058,0.000007,0.642857,00:10
+0,nan,nan,0.787115,13:43

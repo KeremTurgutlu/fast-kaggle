@@ -9,24 +9,32 @@ from fastai.vision import *
 class SemanticSegmentationData:
     "Creates semantic segmentation dataset from fastai datablock API"
     def __init__(self, PATH, IMAGES, MASKS, CODES, TRAIN, VALID, TEST,
-                     sample_size, bs, size, has_test_labels=True):
+                     sample_size, bs, size, has_test_labels=True, **dl_kwargs):
+        # input params
+        self.path, self.sample_size, self.bs, self.size, self.has_test_labels  = \
+        PATH, sample_size, bs, size, has_test_labels
+        self.codes, self.VALID, self.TEST = \
+        np.loadtxt(self.path/CODES, dtype=str), VALID, TEST
+        self.dl_kwargs = dl_kwargs
 
-        self.path, self.sample_size, self.bs, self.size, self.has_test_labels  =\
-                                            PATH, sample_size, bs, size, has_test_labels
-        self.codes, self.VALID, self.TEST = np.loadtxt(self.path/CODES, dtype=str), VALID, TEST
-
+        # read training
         self.train_df = pd.read_csv(self.path/TRAIN, header=None)
-        if sample_size: self.train_df = self.train_df.sample(sample_size)
-        if (VALID is not None) and (type(VALID) is str): self.valid_file = True
-        else: self.valid_file = False
+        if sample_size:
+            self.train_df = self.train_df.sample(sample_size)
 
+        # read validation and test
+        if (VALID is not None) and (type(VALID) is str):
+            self.valid_file = True
+        else:
+            self.valid_file = False
         if self.valid_file: self.valid_df = pd.read_csv(self.path/VALID, header=None)
-
         if TEST is not None: self.test_df = pd.read_csv(self.path/TEST, header=None)
 
+        # image and mask folders
         self.path_img, self.path_lbl = self.path/IMAGES, self.path/MASKS
 
-    def get_y_fn(self, x): return self.path_lbl/f'{Path(x).stem}.png'
+    def get_y_fn(self, x):
+        return self.path_lbl/f'{Path(x).stem}.png'
 
     def get_data(self):
         if self.valid_file:
@@ -36,15 +44,20 @@ class SemanticSegmentationData:
         else:
             self.train_valid_df = self.train_df
 
-        il = SegmentationItemList.from_df(self.train_valid_df, self.path_img) # get
-        if self.valid_file: ill = il.split_from_df("is_valid") # split
-        else: ill = il.split_by_rand_pct(ifnone(self.VALID, 0.2)) # split
-        ll = ill.label_from_func(self.get_y_fn, classes=self.codes) # label
-
-        data = (ll.transform(get_transforms(), size=(self.size, self.size), tfm_y=True,
+        # get
+        il = SegmentationItemList.from_df(self.train_valid_df, self.path_img)
+        # split
+        if self.valid_file: ill = il.split_from_df("is_valid")
+        else: ill = il.split_by_rand_pct(ifnone(self.VALID, 0.2))
+        # label
+        ll = ill.label_from_func(self.get_y_fn, classes=self.codes)
+        # databunch
+        data = (ll.transform(get_transforms(),
+                             size=self.size,
+                             tfm_y=True,
                              resize_method=ResizeMethod.SQUISH)
-                    .databunch(bs=self.bs))
-        # add_test
+                    .databunch(bs=self.bs, **self.dl_kwargs))
+        # test
         if self.TEST:
             il = SegmentationItemList.from_df(self.test_df, self.path_img) # get
             data.add_test(il, tfm_y=False)
