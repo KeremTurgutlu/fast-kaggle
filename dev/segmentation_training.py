@@ -131,9 +131,11 @@ def main(
     if TEST: dtypes = ["Valid", "Test"]
     else: dtypes = ["Valid"]
     for dtype in dtypes:
-        print(f"Generating Raw Predictions for {dtype}...")
-        preds, targs = learn.get_preds(getattr(DatasetType, dtype))
-        fnames = list(data.test_ds.items)
+        if not gpu: print(f"Generating Raw Predictions for {dtype}...")
+        ds_type = getattr(DatasetType, dtype)
+        preds, targs = learn.get_preds(ds_type)
+        ds = learn.data.test_ds if dtype == "Test" else learn.data.valid_ds
+        fnames = list(ds.items)
         try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
                  path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
         if not gpu: print(f"Done.")
