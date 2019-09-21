@@ -33,8 +33,9 @@ class SemanticSegmentationData:
         # image and mask folders
         self.path_img, self.path_lbl = self.path/IMAGES, self.path/MASKS
 
-    def get_y_fn(self, x):
-        return self.path_lbl/f'{Path(x).stem}{self.suffix}'
+    @staticmethod
+    def get_y_fn(path_lbl, suffix, x):
+        return path_lbl/f'{Path(x).stem}{suffix}'
 
     def get_data(self):
         if self.valid_file:
@@ -50,7 +51,7 @@ class SemanticSegmentationData:
         if self.valid_file: ill = il.split_from_df("is_valid")
         else: ill = il.split_by_rand_pct(ifnone(self.VALID, 0.2))
         # label
-        ll = ill.label_from_func(self.get_y_fn, classes=self.codes)
+        ll = ill.label_from_func(partial(self.get_y_fn, self.path_lbl, self.suffix), classes=self.codes)
         # databunch
         data = (ll.transform(get_transforms(),
                              size=self.size,
