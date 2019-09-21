@@ -20,6 +20,7 @@ def main(
     TRAIN:Param("train.txt with training image names", str)="",
     VALID:Param("valid.txt with validation image names", str)=None,
     TEST:Param("test.txt with test image names", str)=None,
+    suffix:Param("suffix for label filenames", str)=".png",
     sample_size:Param("", int)=None,
     bs:Param("Batch size", int)=80,
     size:Param("Image size", int)=224,
@@ -52,7 +53,8 @@ def main(
     PATH = Path(PATH)
     try: VALID = float(VALID)
     except: pass
-    ssdata = SemanticSegmentationData(PATH, IMAGES, MASKS, CODES, TRAIN, VALID, TEST, sample_size, bs, size)
+    ssdata = SemanticSegmentationData(PATH, IMAGES, MASKS, CODES, TRAIN,
+                                      VALID, TEST, sample_size, bs, size, suffix)
     data = ssdata.get_data()
     if imagenet_pretrained: data.normalize(imagenet_stats)
     else: data.normalize()   
@@ -126,16 +128,15 @@ def main(
         learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
         
     # save valid and test preds 
-    if not gpu:
-        if TEST: dtypes = ["Valid", "Test"]
-        else: dtypes = ["Valid"]
-        for dtype in dtypes:
-            print(f"Generating Raw Predictions for {dtype}...")
-            preds, targs = learn.get_preds(getattr(DatasetType, dtype))
-            fnames = list(data.test_ds.items)
-            try_save({"fnames":fnames, "pzxreds":to_cpu(preds), "targs":to_cpu(targs)},
-                     path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
-            print(f"Done.")
+    if TEST: dtypes = ["Valid", "Test"]
+    else: dtypes = ["Valid"]
+    for dtype in dtypes:
+        print(f"Generating Raw Predictions for {dtype}...")
+        preds, targs = learn.get_preds(getattr(DatasetType, dtype))
+        fnames = list(data.test_ds.items)
+        try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
+                 path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
+        if not gpu: print(f"Done.")
             
 #     # to_fp32 + export learn
 #     if not gpu:

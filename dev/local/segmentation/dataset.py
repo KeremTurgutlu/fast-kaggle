@@ -8,11 +8,11 @@ from fastai.vision import *
 #Cell
 class SemanticSegmentationData:
     "Creates semantic segmentation dataset from fastai datablock API"
-    def __init__(self, PATH, IMAGES, MASKS, CODES, TRAIN, VALID, TEST,
-                     sample_size, bs, size, has_test_labels=True, **dl_kwargs):
+    def __init__(self,PATH,IMAGES,MASKS,CODES,TRAIN,VALID,TEST,
+                     sample_size,bs,size,suffix='.png',**dl_kwargs):
         # input params
-        self.path, self.sample_size, self.bs, self.size, self.has_test_labels  = \
-        PATH, sample_size, bs, size, has_test_labels
+        self.path, self.sample_size, self.bs, self.size, self.suffix  = \
+        PATH, sample_size, bs, size, suffix
         self.codes, self.VALID, self.TEST = \
         np.loadtxt(self.path/CODES, dtype=str), VALID, TEST
         self.dl_kwargs = dl_kwargs
@@ -34,7 +34,7 @@ class SemanticSegmentationData:
         self.path_img, self.path_lbl = self.path/IMAGES, self.path/MASKS
 
     def get_y_fn(self, x):
-        return self.path_lbl/f'{Path(x).stem}.png'
+        return self.path_lbl/f'{Path(x).stem}{self.suffix}'
 
     def get_data(self):
         if self.valid_file:

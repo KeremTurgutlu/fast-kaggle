@@ -20,7 +20,5 @@
   "dice_loss": "11_segmentation_losses.ipynb",
   "iou": "12_segmentation_metrics.ipynb",
   "multilabel_dice": "12_segmentation_metrics.ipynb",
-  "multilabel_iou": "12_segmentation_metrics.ipynb",
-  "cells": "segmentation_training.ipynb",
-  "src": "segmentation_training.ipynb"
+  "multilabel_iou": "12_segmentation_metrics.ipynb"
 }
