@@ -17,6 +17,7 @@
   "SaveDistributedModelCallback": "03_callbacks.ipynb",
   "CSVDistributedLogger": "03_callbacks.ipynb",
   "SemanticSegmentationData": "10_segmentation_dataset.ipynb",
+  "cross_entropy": "11_segmentation_losses.ipynb",
   "dice_loss": "11_segmentation_losses.ipynb",
   "iou": "12_segmentation_metrics.ipynb",
   "multilabel_dice": "12_segmentation_metrics.ipynb",
