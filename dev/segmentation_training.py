@@ -30,7 +30,7 @@ def main(
     epochs:Param("Number of max epochs to train", int)=10,
     tracking_metric:Param("Which metric to use for tracking and evaluation", str)="dice",
     void_name:Param("Background class name", str)=None,
-    loss_function:Param("Loss function for training", str)="crossentropy",
+    loss_function:Param("Loss function for training", str)="cross_entropy",
     opt:Param("Optimizer for training", str)=None,
     arch_name:Param("Architecture backbone for training", str)="resnet34",
     EXPORT_PATH:Param("Where to export trained model", str)=".",
@@ -52,7 +52,7 @@ def main(
     # Get data
     PATH = Path(PATH)
     try: VALID = float(VALID)
-    except: pass
+    except: passzx
     ssdata = SemanticSegmentationData(PATH, IMAGES, MASKS, CODES, TRAIN,
                                       VALID, TEST, sample_size, bs, size, suffix)
     data = ssdata.get_data()
@@ -76,7 +76,7 @@ def main(
     
     # loss
     loss = getattr(losses, loss_function, None)
-    if loss: learn.loss_func = loss 
+    learn.loss_func = loss 
     if not gpu: print(f"Training with loss: {learn.loss_func}")
 
     # callbacks
