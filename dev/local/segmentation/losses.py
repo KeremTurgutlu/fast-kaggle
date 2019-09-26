@@ -13,7 +13,7 @@ cross_entropy = CrossEntropyFlat(axis=1)
 def dice_loss(input, target):
     "input: logits (B,2,H,W), target: labels (B,1,H,W)"
     smooth = 1.
-    input = input.softmax(1)[:,1,:].unsqueeze(1)
+    input = input.softmax(1)[:,1,:].unsqueeze(1).contiguous()
     iflat = input.view(-1)
     tflat = target.view(-1).float()
     intersection = (iflat * tflat).sum()
