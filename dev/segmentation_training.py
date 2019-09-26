@@ -7,6 +7,7 @@ from fastai.utils.mem import *
 from local.segmentation.dataset import *
 from local.segmentation import metrics
 from local.segmentation import losses
+from local.segmentation import losses_v2
 from local.callbacks import *
 from local.optimizers import *
 
@@ -75,7 +76,11 @@ def main(
     learn.metrics = [metric]
     
     # loss
-    loss = getattr(losses, loss_function)
+    try:
+        loss = getattr(losses, loss_function)
+    except:
+        loss = getattr(losses_v2, loss_function)
+        
     learn.loss_func = loss 
     if not gpu: print(f"Training with loss: {learn.loss_func}")
 
