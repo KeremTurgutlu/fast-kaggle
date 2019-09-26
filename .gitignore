@@ -4,6 +4,7 @@ models/
 tmp/
 *.pkl
 experiment_export/
+experiment_exports/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

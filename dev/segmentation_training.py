@@ -75,7 +75,7 @@ def main(
     learn.metrics = [metric]
     
     # loss
-    loss = getattr(losses, loss_function, None)
+    loss = getattr(losses, loss_function)
     learn.loss_func = loss 
     if not gpu: print(f"Training with loss: {learn.loss_func}")
 
