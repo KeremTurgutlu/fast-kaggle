@@ -87,7 +87,8 @@ def main(
     # callbacks
     save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=model_name, gpu=gpu)
     csvlog_cb = CSVDistributedLogger(learn, 'training_log', append=True, gpu=gpu)
-    cbs = [save_cb, csvlog_cb]
+    nan_cb = TerminateOnNaNCallback()
+    cbs = [save_cb, csvlog_cb, nan_cb]
         
     # optimizer / scheduler
     alpha=0.99; mom=0.9; eps=1e-8
@@ -133,21 +134,17 @@ def main(
         learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
         
     # save valid and test preds 
-    if TEST: dtypes = ["Valid", "Test"]
-    else: dtypes = ["Valid"]
-    for dtype in dtypes:
-        if not gpu: print(f"Generating Raw Predictions for {dtype}...")
-        ds_type = getattr(DatasetType, dtype)
-        preds, targs = learn.get_preds(ds_type)
-        ds = learn.data.test_ds if dtype == "Test" else learn.data.valid_ds
-        fnames = list(ds.items)
-        try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
-                 path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
-        if not gpu: print(f"Done.")
-            
-#     # to_fp32 + export learn
-#     if not gpu:
-#         learn.to_fp32()    
-#         learn.load(model_name) # load best saved model
-#         print(f"Exporting model to: {EXPORT_PATH}")
-#         learn.export(f"{model_name}_export.pkl")
+    if not nan_cb:
+        if TEST: dtypes = ["Valid", "Test"]
+        else: dtypes = ["Valid"]
+        for dtype in dtypes:
+            if not gpu: print(f"Generating Raw Predictions for {dtype}...")
+            ds_type = getattr(DatasetType, dtype)
+            preds, targs = learn.get_preds(ds_type)
+            ds = learn.data.test_ds if dtype == "Test" else learn.data.valid_ds
+            fnames = list(ds.items)
+            try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
+                     path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
+            if not gpu: print(f"Done.")
+    else:
+        if not gpu: print(f"Skipping Predictions due to NaN.")

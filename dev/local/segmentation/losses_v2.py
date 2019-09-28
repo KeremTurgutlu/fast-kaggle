@@ -5,7 +5,6 @@ __all__ = ['dice_loss_v2', 'stable_bce_loss', 'jaccard_loss', 'lovasz_loss', 'lo
 
 #Cell
 from fastai.vision import *
-from .lovasz_loss import *
 
 #Cell
 class _SingleSoftmaxOutput(nn.Module):
@@ -203,7 +202,7 @@ def _lovasz_sigmoid_flat(probas, labels):
     return loss
 
 def _symmetric_lovasz(outputs, targets, ):
-    return (lovasz_hinge(outputs, targets) +_lovasz_hinge(-outputs, 1 - targets)) / 2
+    return (_lovasz_hinge(outputs, targets) +_lovasz_hinge(-outputs, 1 - targets)) / 2
 
 def _mean(l, ignore_nan=False, empty=0):
     """

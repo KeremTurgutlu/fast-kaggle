@@ -14,6 +14,7 @@
   "test_fig_exists": "00_test.ipynb",
   "run_command": "01_script.ipynb",
   "fit_warm_cosanneal": "02_scheduler.ipynb",
+  "TerminateOnNaNCallback": "03_callbacks.ipynb",
   "SaveDistributedModelCallback": "03_callbacks.ipynb",
   "CSVDistributedLogger": "03_callbacks.ipynb",
   "SemanticSegmentationData": "10_segmentation_dataset.ipynb",
