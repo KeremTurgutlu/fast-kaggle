@@ -41,8 +41,6 @@
   "seresdunext50": "13_segmentation_models.ipynb",
   "seresdunext101": "13_segmentation_models.ipynb",
   "deeplab_config": "13_segmentation_models.ipynb",
-  "Upsample": "13_segmentation_models.ipynb",
-  "DeepV3Plus": "13_segmentation_models.ipynb",
   "deeplabv3res50": "13_segmentation_models.ipynb",
   "deeplabv3res101": "13_segmentation_models.ipynb",
   "deeplabv3seresnext50": "13_segmentation_models.ipynb",
