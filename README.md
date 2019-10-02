@@ -5,7 +5,7 @@ FastAI for Kaggle Competitions
 
 Deliver a simple to use and reproducible framework for running combinations of experiments for specific tasks, most likely a task seen in Kaggle Competition, while achieving top results.
 
-## dependencies
+## Dependencies
 
 - fastai v1.0.x[dev]
 
