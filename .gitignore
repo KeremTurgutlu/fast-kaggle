@@ -1,3 +1,6 @@
+#project dirs
+steel/
+
 # Model files
 *.pth
 models/
