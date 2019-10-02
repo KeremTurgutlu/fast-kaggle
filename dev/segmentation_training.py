@@ -142,7 +142,7 @@ def main(
         learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
         
     # modelexports
-    if not nan_cb:
+    if not nan_cb.isnan:
         if TEST: dtypes = ["Valid", "Test"]
         else: dtypes = ["Valid"]
         for dtype in dtypes:
