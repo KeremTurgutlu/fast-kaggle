@@ -1,4 +1,4 @@
-# fast-kaggle [WIP]
+# fast-kaggle [WIP - ⚠️ Very Early Stage]
 FastAI for Kaggle Competitions
 
 # dependencies
