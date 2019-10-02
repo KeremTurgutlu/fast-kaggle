@@ -33,6 +33,7 @@
   "model_funcs": "13_segmentation_models.ipynb",
   "splits": "13_segmentation_models.ipynb",
   "get_model": "13_segmentation_models.ipynb",
+  "dunet_config": "13_segmentation_models.ipynb",
   "resdunet18": "13_segmentation_models.ipynb",
   "resdunet34": "13_segmentation_models.ipynb",
   "resdunet50": "13_segmentation_models.ipynb",
