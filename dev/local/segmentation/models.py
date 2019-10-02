@@ -160,7 +160,7 @@ class _AtrousSpatialPyramidPoolingModule(nn.Module):
 
         img_features = self.img_pooling(x)
         img_features = self.img_conv(img_features)
-        img_features = Upsample(img_features, x_size[2:])
+        img_features = _Upsample(img_features, x_size[2:])
         out = img_features
 
         for f in self.features:
@@ -262,10 +262,10 @@ class _DeepV3Plus(nn.Module):
         dec0_up = self.bot_aspp(xp)
         if self.skip == 'm1':
             dec0_fine = self.bot_fine(x1)
-            dec0_up = Upsample(dec0_up, x1.size()[2:])
+            dec0_up = _Upsample(dec0_up, x1.size()[2:])
         else:
             dec0_fine = self.bot_fine(x2)
-            dec0_up = Upsample(dec0_up, x2.size()[2:])
+            dec0_up = _Upsample(dec0_up, x2.size()[2:])
 
         dec0 = [dec0_fine, dec0_up]
         dec0 = torch.cat(dec0, 1)
