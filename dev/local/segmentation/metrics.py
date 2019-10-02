@@ -5,7 +5,6 @@ __all__ = ['foreground_acc', 'dice', 'iou', 'multilabel_dice', 'multilabel_iou']
 #Cell
 from fastai.vision import *
 from fastai.metrics import foreground_acc, dice
-from ..test import *
 
 #Cell
 def iou(input: torch.Tensor, targs: torch.Tensor, **kwargs)->Rank0Tensor:

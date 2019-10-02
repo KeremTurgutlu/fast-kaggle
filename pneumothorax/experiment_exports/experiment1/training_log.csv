@@ -1,0 +1,6 @@
+epoch,train_loss,valid_loss,dice,time
+0,nan,nan,0.787115,13:46
+epoch,train_loss,valid_loss,dice,time
+0,nan,nan,0.787115,14:24
+epoch,train_loss,valid_loss,dice,time
+0,nan,nan,0.787115,13:43

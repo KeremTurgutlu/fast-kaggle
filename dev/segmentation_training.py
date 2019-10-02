@@ -7,6 +7,7 @@ from fastai.utils.mem import *
 from local.segmentation.dataset import *
 from local.segmentation import metrics
 from local.segmentation import losses
+from local.segmentation import losses_v2
 from local.callbacks import *
 from local.optimizers import *
 
@@ -20,6 +21,7 @@ def main(
     TRAIN:Param("train.txt with training image names", str)="",
     VALID:Param("valid.txt with validation image names", str)=None,
     TEST:Param("test.txt with test image names", str)=None,
+    suffix:Param("suffix for label filenames", str)=".png",
     sample_size:Param("", int)=None,
     bs:Param("Batch size", int)=80,
     size:Param("Image size", int)=224,
@@ -29,7 +31,7 @@ def main(
     epochs:Param("Number of max epochs to train", int)=10,
     tracking_metric:Param("Which metric to use for tracking and evaluation", str)="dice",
     void_name:Param("Background class name", str)=None,
-    loss_function:Param("Loss function for training", str)="crossentropy",
+    loss_function:Param("Loss function for training", str)="cross_entropy",
     opt:Param("Optimizer for training", str)=None,
     arch_name:Param("Architecture backbone for training", str)="resnet34",
     EXPORT_PATH:Param("Where to export trained model", str)=".",
@@ -51,8 +53,9 @@ def main(
     # Get data
     PATH = Path(PATH)
     try: VALID = float(VALID)
-    except: pass
-    ssdata = SemanticSegmentationData(PATH, IMAGES, MASKS, CODES, TRAIN, VALID, TEST, sample_size, bs, size)
+    except: passzx
+    ssdata = SemanticSegmentationData(PATH, IMAGES, MASKS, CODES, TRAIN,
+                                      VALID, TEST, sample_size, bs, size, suffix)
     data = ssdata.get_data()
     if imagenet_pretrained: data.normalize(imagenet_stats)
     else: data.normalize()   
@@ -73,28 +76,34 @@ def main(
     learn.metrics = [metric]
     
     # loss
-    loss = getattr(losses, loss_function, None)
-    if loss: learn.loss_func = loss 
+    try:
+        loss = getattr(losses, loss_function)
+    except:
+        loss = getattr(losses_v2, loss_function)
+        
+    learn.loss_func = loss 
     if not gpu: print(f"Training with loss: {learn.loss_func}")
 
     # callbacks
     save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=model_name, gpu=gpu)
-    csvlog_cb = CSVLogger(learn, 'training_log', append=True)
-    cbs = [save_cb, csvlog_cb]
+    csvlog_cb = CSVDistributedLogger(learn, 'training_log', append=True, gpu=gpu)
+    nan_cb = TerminateOnNaNCallback()
+    cbs = [save_cb, csvlog_cb, nan_cb]
         
     # optimizer / scheduler
     alpha=0.99; mom=0.9; eps=1e-8
     
-    if   opt=='adam' : opt_func = partial(optim.Adam, betas=(mom,alpha), eps=eps)
-    elif opt=='radam' : opt_func = partial(RAdam, betas=(mom,alpha), eps=eps)
-    elif opt=='novograd' : opt_func = partial(Novograd, betas=(mom,alpha), eps=eps)
-    elif opt=='rms'  : opt_func = partial(optim.RMSprop, alpha=alpha, eps=eps)
-    elif opt=='sgd'  : opt_func = partial(optim.SGD, momentum=mom)
-    elif opt=='ranger'  : opt_func = partial(Ranger,  betas=(mom,alpha), eps=eps)
-    elif opt=='ralamb'  : opt_func = partial(Ralamb,  betas=(mom,alpha), eps=eps)
-    elif opt=='rangerlars'  : opt_func = partial(RangerLars,  betas=(mom,alpha), eps=eps)
-    elif opt=='lookahead'  : opt_func = partial(LookaheadAdam, betas=(mom,alpha), eps=eps)
-    elif opt=='lamb'  : opt_func = partial(Lamb, betas=(mom,alpha), eps=eps)
+    if   opt=='adam':        opt_func = partial(optim.Adam, betas=(mom,alpha), eps=eps)
+    elif opt=='radam':       opt_func = partial(RAdam, betas=(mom,alpha), eps=eps)
+    elif opt=='novograd':    opt_func = partial(Novograd, betas=(mom,alpha), eps=eps)
+    elif opt=='rms':         opt_func = partial(optim.RMSprop, alpha=alpha, eps=eps)
+    elif opt=='sgd':         opt_func = partial(optim.SGD, momentum=mom)
+    elif opt=='ranger':      opt_func = partial(Ranger,  betas=(mom,alpha), eps=eps)
+    elif opt=='ralamb':      opt_func = partial(Ralamb,  betas=(mom,alpha), eps=eps)
+    elif opt=='rangerlars':  opt_func = partial(RangerLars,  betas=(mom,alpha), eps=eps)
+    elif opt=='lookahead':   opt_func = partial(LookaheadAdam, betas=(mom,alpha), eps=eps)
+    elif opt=='lamb':        opt_func = partial(Lamb, betas=(mom,alpha), eps=eps)
+    
     if opt: learn.opt_func = opt_func
 
     # distributed
@@ -125,17 +134,17 @@ def main(
         learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
         
     # save valid and test preds 
-    if TEST: dtypes = ["Valid", "Test"]
-    else: dtypes = ["Valid"]
-    for dtype in dtypes:
-        if not gpu: print(f"Generating Raw Predictions for {dtype}...")
-        preds, targs = learn.get_preds(getattr(DatasetType, dtype))
-        fnames = list(data.test_ds.items)
-        try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
-                 path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
-
-    # to_fp32 + export learn
-    learn.to_fp32()    
-    learn.load(model_name) # load best saved model
-    if not gpu: print(f"Exporting model to: {EXPORT_PATH}")
-    learn.export(f"{model_name}_export.pkl")
+    if not nan_cb:
+        if TEST: dtypes = ["Valid", "Test"]
+        else: dtypes = ["Valid"]
+        for dtype in dtypes:
+            if not gpu: print(f"Generating Raw Predictions for {dtype}...")
+            ds_type = getattr(DatasetType, dtype)
+            preds, targs = learn.get_preds(ds_type)
+            ds = learn.data.test_ds if dtype == "Test" else learn.data.valid_ds
+            fnames = list(ds.items)
+            try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
+                     path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
+            if not gpu: print(f"Done.")
+    else:
+        if not gpu: print(f"Skipping Predictions due to NaN.")
