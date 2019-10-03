@@ -11,6 +11,7 @@ from local.segmentation import losses_binary, losses_multilabel
 from local.callbacks import *
 from local.optimizers import *
 
+
 # https://stackoverflow.com/questions/8299270/ultimate-answer-to-relative-python-imports
 @call_parse
 def main(    
@@ -25,7 +26,7 @@ def main(
     suffix:Param("suffix for label filenames", str)=".png",
     sample_size:Param("", int)=None,
     bs:Param("Batch size", int)=80,
-    size:Param("Image size", int)=224,
+    size:Param("Image size", str)="224",
     imagenet_pretrained:Param("Whether to normalize with inet stats", int)=1,
     
     # model
@@ -62,6 +63,7 @@ def main(
     PATH = Path(PATH)
     try: VALID = float(VALID)
     except: passzx
+    size = eval(size)
     ssdata = SemanticSegmentationData(PATH, IMAGES, MASKS, CODES, TRAIN,
                                       VALID, TEST, sample_size, bs, size, suffix)
     data = ssdata.get_data()
