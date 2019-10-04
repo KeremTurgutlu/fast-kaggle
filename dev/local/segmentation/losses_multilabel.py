@@ -11,8 +11,10 @@ cross_entropy = CrossEntropyFlat(axis=1)
 
 #Cell
 def bce_sigmoid(input, target, **bce_kwargs):
+    # float() fail for fp16 - nan
     "Background is not predict, e.g. codes.txt and background value in label image is 0"
     nclasses = input.size(1)
+    dtype=input.dtype
     trange = tensor(np.arange(1, nclasses+1))[None,...,None,None].to(target.device)
     new_target = target == trange
-    return F.binary_cross_entropy_with_logits(input, new_target.float(), **bce_kwargs)
+    return F.binary_cross_entropy_with_logits(input, new_target.float().to(dtype), **bce_kwargs)
