@@ -30,6 +30,8 @@
   "iou": "12_segmentation_metrics.ipynb",
   "multilabel_dice": "12_segmentation_metrics.ipynb",
   "multilabel_iou": "12_segmentation_metrics.ipynb",
+  "sigmoid_multilabel_dice": "12_segmentation_metrics.ipynb",
+  "sigmoid_multilabel_iou": "12_segmentation_metrics.ipynb",
   "default_configs": "13_segmentation_models.ipynb",
   "model_funcs": "13_segmentation_models.ipynb",
   "splits": "13_segmentation_models.ipynb",
