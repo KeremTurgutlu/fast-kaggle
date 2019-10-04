@@ -12,9 +12,14 @@ def iou(input: torch.Tensor, targs: torch.Tensor, **kwargs)->Rank0Tensor:
     return dice(input, targs, iou=True, **kwargs)
 
 #Cell
-def multilabel_dice(input:Tensor, targs:Tensor, c:int, iou:bool=False, mean=True, eps:float=1e-8)->Rank0Tensor:
+def multilabel_dice(input:Tensor, targs:Tensor, c:int, iou:bool=False,
+                    mean=True, eps:float=1e-8, sigmoid:bool=False, threshold:float=0.5)->Rank0Tensor:
     "Batch/Dataset Mean Dice"
-    input = input.argmax(dim=1, keepdim=True).view(-1)
+    if sigmoid:
+        input.sigmoid() > threshold
+    else:
+        input = input.argmax(dim=1, keepdim=True).view(-1)
+
     targs = targs.view(-1)
     res = []
     for ci in range(c):

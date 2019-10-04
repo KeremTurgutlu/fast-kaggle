@@ -19,6 +19,7 @@
   "CSVDistributedLogger": "03_callbacks.ipynb",
   "SemanticSegmentationData": "10_segmentation_dataset.ipynb",
   "cross_entropy": "11b_segmentation_losses_binary.ipynb",
+  "bce_sigmoid": "11_segmentation_losses_mulitlabel.ipynb",
   "dice_loss_v2": "11b_segmentation_losses_binary.ipynb",
   "stable_bce_loss": "11b_segmentation_losses_binary.ipynb",
   "jaccard_loss": "11b_segmentation_losses_binary.ipynb",
