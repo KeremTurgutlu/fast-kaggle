@@ -81,6 +81,12 @@ def main(
     if pretrained: learn.freeze()
     learn.path, learn.model_dir = Path(EXPORT_PATH), 'models'
 
+    # loss
+    try: loss = getattr(losses_binary, loss_function)
+    except: loss = getattr(losses_multilabel, loss_function)  
+    learn.loss_func = loss 
+    if not gpu: print(f"Training with loss: {learn.loss_func}")
+        
     # metric
     metric = getattr(metrics, tracking_metric)
     if not gpu: print(f"Training with metric: {metric}")
@@ -89,12 +95,6 @@ def main(
         void_code = np.where(learn.data.classes == void_name)[0].item()
         metric = partial(metric, void_code=void_code)
     learn.metrics = [metric]
-    
-    # loss
-    try: loss = getattr(losses_binary, loss_function)
-    except: loss = getattr(losses_multilabel, loss_function)  
-    learn.loss_func = loss 
-    if not gpu: print(f"Training with loss: {learn.loss_func}")
 
     # callbacks
     save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=f"best_of_{modelname}", gpu=gpu)
