@@ -16,7 +16,11 @@ def multilabel_dice(input:Tensor, targs:Tensor, c:int, iou:bool=False,
                     mean=True, eps:float=1e-8, sigmoid:bool=False, threshold:float=0.5)->Rank0Tensor:
     "Batch/Dataset Mean Dice"
     if sigmoid:
-        input.sigmoid() > threshold
+        sigmoid_input = input.sigmoid()
+        thresholded_input = sigmoid_input > threshold
+        _, indices = torch.max(sigmoid_input, dim=1)
+        values, _ = torch.max(thresholded_input, dim=1)
+        input = (values.float()*indices.float()).view(-1)
     else:
         input = input.argmax(dim=1, keepdim=True).view(-1)
 
