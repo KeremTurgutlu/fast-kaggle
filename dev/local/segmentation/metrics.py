@@ -55,7 +55,8 @@ def sigmoid_multilabel_iou(input, target, c, threshold):
 #Cell
 def _dice(input:Tensor, targs:Tensor, iou:bool=False, eps:float=1e-8,
           reduce:bool=True)->Rank0Tensor:
-    "Dice coefficient metric for binary target. If iou=True, returns iou metric, classic for segmentation problems."
+    "Dice coefficient metric for probas and binary target."
+#     warn("Warning union=0->0")
     n = targs.shape[0]
     input = input.view(n,-1).float()
     targs = targs.view(n,-1).float()
@@ -63,12 +64,13 @@ def _dice(input:Tensor, targs:Tensor, iou:bool=False, eps:float=1e-8,
     union = (input+targs).sum(dim=1).float()
     if not iou: l = 2. * intersect / union
     else: l = intersect / (union-intersect+eps)
-    l[union == 0.] = 1.
+#     l[union == 0.] = 1.
+    l[union == 0.] = 0.
     if reduce: return l.mean()
     else: return l
 
 #Cell
-def _to_sigmoid_input(logits, threshold):
+def _to_sigmoid_input(logits, threshold=0.5):
     "convert logits to preds with sigmoid and thresh (void=0)"
     sigmoid_input = logits.sigmoid()
     thresholded_input = sigmoid_input > threshold
