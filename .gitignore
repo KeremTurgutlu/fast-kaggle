@@ -1,3 +1,7 @@
+#project dirs
+steel/
+brain_mets/
+
 # Model files
 *.pth
 models/

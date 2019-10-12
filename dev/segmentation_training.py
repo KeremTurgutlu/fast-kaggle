@@ -9,7 +9,8 @@ from local.segmentation.models import *
 from local.segmentation import metrics
 from local.segmentation import losses_binary, losses_multilabel
 from local.callbacks import *
-from local.optimizers import *
+from local.optimizers.optimizers import *
+
 
 # https://stackoverflow.com/questions/8299270/ultimate-answer-to-relative-python-imports
 @call_parse
@@ -25,7 +26,7 @@ def main(
     suffix:Param("suffix for label filenames", str)=".png",
     sample_size:Param("", int)=None,
     bs:Param("Batch size", int)=80,
-    size:Param("Image size", int)=224,
+    size:Param("Image size", str)="(224,224)",
     imagenet_pretrained:Param("Whether to normalize with inet stats", int)=1,
     
     # model
@@ -61,7 +62,8 @@ def main(
     # data
     PATH = Path(PATH)
     try: VALID = float(VALID)
-    except: passzx
+    except: pass
+    size = eval(size)
     ssdata = SemanticSegmentationData(PATH, IMAGES, MASKS, CODES, TRAIN,
                                       VALID, TEST, sample_size, bs, size, suffix)
     data = ssdata.get_data()
@@ -79,6 +81,12 @@ def main(
     if pretrained: learn.freeze()
     learn.path, learn.model_dir = Path(EXPORT_PATH), 'models'
 
+    # loss
+    try: loss = getattr(losses_binary, loss_function)
+    except: loss = getattr(losses_multilabel, loss_function)  
+    learn.loss_func = loss 
+    if not gpu: print(f"Training with loss: {learn.loss_func}")
+        
     # metric
     metric = getattr(metrics, tracking_metric)
     if not gpu: print(f"Training with metric: {metric}")
@@ -87,12 +95,6 @@ def main(
         void_code = np.where(learn.data.classes == void_name)[0].item()
         metric = partial(metric, void_code=void_code)
     learn.metrics = [metric]
-    
-    # loss
-    try: loss = getattr(losses_binary, loss_function)
-    except: loss = getattr(losses_multilabel, loss_function)  
-    learn.loss_func = loss 
-    if not gpu: print(f"Training with loss: {learn.loss_func}")
 
     # callbacks
     save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=f"best_of_{modelname}", gpu=gpu)
@@ -102,17 +104,8 @@ def main(
         
     # optimizer / scheduler
     alpha, mom, eps = 0.99, 0.9, 1e-8
-    if   opt=='adam':        opt_func = partial(optim.Adam, betas=(mom,alpha), eps=eps)
-    elif opt=='radam':       opt_func = partial(RAdam, betas=(mom,alpha), eps=eps)
-    elif opt=='novograd':    opt_func = partial(Novograd, betas=(mom,alpha), eps=eps)
-    elif opt=='rms':         opt_func = partial(optim.RMSprop, alpha=alpha, eps=eps)
-    elif opt=='sgd':         opt_func = partial(optim.SGD, momentum=mom)
-    elif opt=='ranger':      opt_func = partial(Ranger,  betas=(mom,alpha), eps=eps)
-    elif opt=='ralamb':      opt_func = partial(Ralamb,  betas=(mom,alpha), eps=eps)
-    elif opt=='rangerlars':  opt_func = partial(RangerLars,  betas=(mom,alpha), eps=eps)
-    elif opt=='lookahead':   opt_func = partial(LookaheadAdam, betas=(mom,alpha), eps=eps)
-    elif opt=='lamb':        opt_func = partial(Lamb, betas=(mom,alpha), eps=eps)
-    if opt: learn.opt_func = opt_func
+    if opt: opt_func = get_opt_func(opt, alpha, mom, eps); learn.opt_func = opt_func
+    if not gpu: print(f"Starting training with max_lr: {learn.opt_func}")
 
     # distributed
     if (gpu is not None) & (num_distrib()>1): learn.to_distributed(gpu)
