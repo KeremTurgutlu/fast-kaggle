@@ -104,7 +104,7 @@ def main(
         
     # optimizer / scheduler
     if opt: 
-        opt_func = get_opt_func(opt, alpha, mom, eps)
+        opt_func = get_opt_func(opt) # TODO: alpha, mom, eps
         learn.opt_func = opt_func
     if not gpu: print(f"Starting training with opt_func: {learn.opt_func}")
 
@@ -135,7 +135,7 @@ def main(
         if not gpu: print("Training from scratch")
         learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
         
-    # modelexports
+    # modelexports - https://github.com/NVIDIA/apex/issues/515
     if (not nan_cb.isnan) and (not gpu):
         learn.load(f"best_of_{modelname}") # load best model
         if TEST: dtypes = ["Valid", "Test"]
