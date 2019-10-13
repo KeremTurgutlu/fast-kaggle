@@ -1,0 +1,14 @@
+epoch,train_loss,valid_loss,dice,time
+0,nan,#na#,00:06
+epoch,train_loss,valid_loss,dice,time
+0,nan,#na#,00:01
+epoch,train_loss,valid_loss,dice,time
+0,nan,#na#,00:01
+epoch,train_loss,valid_loss,dice,time
+0,nan,#na#,00:07
+epoch,train_loss,valid_loss,dice,time
+0,nan,#na#,00:02
+epoch,train_loss,valid_loss,dice,time
+0,nan,#na#,00:02
+epoch,train_loss,valid_loss,dice,time
+0,1.511788,1.071490,16.095434,00:12

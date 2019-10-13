@@ -7,9 +7,10 @@ from fastai.vision import *
 from . import *
 
 #Cell
-def get_opt_func(opt, mom=0.99, alpha=0.9, eps=1e-8):
+def get_opt_func(opt, mom=0.99, alpha=0.9, eps=1e-4):
     "return optimizer function"
     if   opt=='adam':        opt_func = partial(optim.Adam, betas=(mom,alpha), eps=eps)
+    elif opt=='adamw':       opt_func = partial(AdamW, betas=(mom,alpha), eps=eps)
     elif opt=='radam':       opt_func = partial(RAdam, betas=(mom,alpha), eps=eps)
     elif opt=='novograd':    opt_func = partial(Novograd, betas=(mom,alpha), eps=eps)
     elif opt=='rms':         opt_func = partial(optim.RMSprop, alpha=alpha, eps=eps)
@@ -19,4 +20,5 @@ def get_opt_func(opt, mom=0.99, alpha=0.9, eps=1e-8):
     elif opt=='rangerlars':  opt_func = partial(RangerLars,  betas=(mom,alpha), eps=eps)
     elif opt=='lookahead':   opt_func = partial(LookaheadAdam, betas=(mom,alpha), eps=eps)
     elif opt=='lamb':        opt_func = partial(Lamb, betas=(mom,alpha), eps=eps)
+    else: raise ValueError(f"Optimizer {opt} doesn't exists")
     return opt_func

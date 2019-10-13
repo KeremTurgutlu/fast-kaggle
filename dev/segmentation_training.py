@@ -104,8 +104,10 @@ def main(
         
     # optimizer / scheduler
     alpha, mom, eps = 0.99, 0.9, 1e-8
-    if opt: opt_func = get_opt_func(opt, alpha, mom, eps); learn.opt_func = opt_func
-    if not gpu: print(f"Starting training with max_lr: {learn.opt_func}")
+    if opt: 
+        opt_func = get_opt_func(opt, alpha, mom, eps)
+        learn.opt_func = opt_func
+    if not gpu: print(f"Starting training with opt_func: {learn.opt_func}")
 
     # distributed
     if (gpu is not None) & (num_distrib()>1): learn.to_distributed(gpu)
@@ -135,7 +137,8 @@ def main(
         learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
         
     # modelexports
-    if not nan_cb.isnan:
+    if (not nan_cb.isnan) and (not gpu):
+        learn.load(f"best_of_{modelname}") # load best model
         if TEST: dtypes = ["Valid", "Test"]
         else: dtypes = ["Valid"]
         for dtype in dtypes:
