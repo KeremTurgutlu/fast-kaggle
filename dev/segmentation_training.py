@@ -103,7 +103,6 @@ def main(
     cbs = [save_cb, csvlog_cb, nan_cb]
         
     # optimizer / scheduler
-    alpha, mom, eps = 0.99, 0.9, 1e-8
     if opt: 
         opt_func = get_opt_func(opt, alpha, mom, eps)
         learn.opt_func = opt_func
