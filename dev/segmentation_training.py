@@ -138,8 +138,7 @@ def main(
     # modelexports - https://github.com/NVIDIA/apex/issues/515
     if (not nan_cb.isnan) and (not gpu):
         learn.load(f"best_of_{modelname}") # load best model
-        if TEST: dtypes = ["Valid", "Test"]
-        else: dtypes = ["Valid"]
+        dtypes = ["Valid", "Test"] if TEST else ["Valid"]
         for dtype in dtypes:
             if not gpu: print(f"Generating Raw Predictions for {dtype}...")
             ds_type = getattr(DatasetType, dtype)
