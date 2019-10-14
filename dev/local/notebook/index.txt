@@ -53,6 +53,7 @@
   "deeplabv3seresnext50": "13_segmentation_models.ipynb",
   "deeplabv3seresnext101": "13_segmentation_models.ipynb",
   "remove_small_regions": "14_segmentation_postprocess.ipynb",
+  "search_best_minsize": "14_segmentation_postprocess.ipynb",
   "mask2rle": "15_segmentation_utils.ipynb",
   "rle2mask": "15_segmentation_utils.ipynb"
 }
