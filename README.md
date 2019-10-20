@@ -8,6 +8,8 @@ Deliver a simple to use and reproducible framework for running combinations of e
 ## Dependencies
 
 - fastai v1.0.x[dev]
+- pretrainedmodels
+- efficientnet_pytorch
 
 ## Modules
 - Semantic Segmentation
