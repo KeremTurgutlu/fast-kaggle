@@ -21,10 +21,16 @@ def _seg_tta_only(learn:Learner, ds_type:DatasetType=DatasetType.Valid) -> Itera
             yield get_preds(learn.model, dl, pbar=pbar, activ=_loss_func2activ(learn.loss_func))[0]
     finally: ds.tfms = old
 
+Learner.seg_tta_only = _seg_tta_only
+
 # flip_lr TTA preds
-def _seg_TTA(seg_learn, ds_type=DatasetType.Valid):
+def _seg_TTA(learn, ds_type=DatasetType.Valid):
     "Takes average of original and flip_lr"
-    orig_preds, flip_lr_preds = list(_seg_tta_only(seg_learn, ds_type))
+    orig_preds, flip_lr_preds = list(learn.seg_tta_only(learn, ds_type))
     flip_lr_preds = torch.stack([torch.flip(o, dims=[-1]) for o in flip_lr_preds], dim=0)
     avg_preds = (orig_preds + flip_lr_preds)/2
     return avg_preds
+
+Learner.segTTA = _seg_TTA
+
+#Cell

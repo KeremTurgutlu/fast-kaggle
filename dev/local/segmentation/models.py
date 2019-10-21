@@ -41,7 +41,7 @@ _res_cut, _res_split = _res_meta['cut'], _res_meta['split']
 
 #Cell
 def _resdunet(arch, data, config):
-    "Returns a resdunet model for a arch from data and final config"
+    "Returns a resdunet model for an arch from data and final config"
     pretrained = config.pop("pretrained")
     try:    size = data.train_ds[0][0].size
     except: size = next(iter(data.train_dl))[0].shape[-2:]

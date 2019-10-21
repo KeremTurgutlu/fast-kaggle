@@ -98,8 +98,8 @@ def main(
     learn.metrics = [metric]
 
     # callbacks
-    save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=f"best_of_{modelname}", gpu=gpu)
-    csvlog_cb = CSVDistributedLogger(learn, 'training_log', append=True, gpu=gpu)
+    save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=f"best_of_{modelname}", gpu=gpu_rank)
+    csvlog_cb = CSVDistributedLogger(learn, 'training_log', append=True, gpu=gpu_rank)
     nan_cb = TerminateOnNaNCallback()
     cbs = [save_cb, csvlog_cb, nan_cb]
         
