@@ -55,9 +55,10 @@ def main(
         
     # Setup init
     gpu = setup_distrib(gpu)
+    gpu_rank = rank_distrib()
     
     # Args
-    if not gpu: print(f"Print args here: ")
+    if not gpu_rank: print(f"Print args here: ")
         
     # data
     PATH = Path(PATH)
@@ -72,7 +73,7 @@ def main(
     
     # model
     model, split_fn, copy_conf = get_model(modelname, data, eval(modelconfig))
-    if not gpu: print(f"Training with model: {modelname} and config: {copy_conf}")
+    if not gpu_rank: print(f"Training with model: {modelname} and config: {copy_conf}")
         
     # learn
     learn = Learner(data, model)
@@ -85,11 +86,11 @@ def main(
     try: loss = getattr(losses_binary, loss_function)
     except: loss = getattr(losses_multilabel, loss_function)  
     learn.loss_func = loss 
-    if not gpu: print(f"Training with loss: {learn.loss_func}")
+    if not gpu_rank: print(f"Training with loss: {learn.loss_func}")
         
     # metric
     metric = getattr(metrics, tracking_metric)
-    if not gpu: print(f"Training with metric: {metric}")
+    if not gpu_rank: print(f"Training with metric: {metric}")
     if tracking_metric in ["multilabel_dice", "multilabel_iou"]: metric = partial(metric, c=learn.data.c)
     if tracking_metric == "foreground_acc": 
         void_code = np.where(learn.data.classes == void_name)[0].item()
@@ -97,15 +98,16 @@ def main(
     learn.metrics = [metric]
 
     # callbacks
-    save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=f"best_of_{modelname}", gpu=gpu)
-    csvlog_cb = CSVDistributedLogger(learn, 'training_log', append=True, gpu=gpu)
+    save_cb = SaveDistributedModelCallback(learn, tracking_metric, "max", name=f"best_of_{modelname}", gpu=gpu_rank)
+    csvlog_cb = CSVDistributedLogger(learn, 'training_log', append=True, gpu=gpu_rank)
     nan_cb = TerminateOnNaNCallback()
     cbs = [save_cb, csvlog_cb, nan_cb]
         
     # optimizer / scheduler
-    alpha, mom, eps = 0.99, 0.9, 1e-8
-    if opt: opt_func = get_opt_func(opt, alpha, mom, eps); learn.opt_func = opt_func
-    if not gpu: print(f"Starting training with max_lr: {learn.opt_func}")
+    if opt: 
+        opt_func = get_opt_func(opt) # TODO: alpha, mom, eps
+        learn.opt_func = opt_func
+    if not gpu_rank: print(f"Starting training with opt_func: {learn.opt_func}")
 
     # distributed
     if (gpu is not None) & (num_distrib()>1): learn.to_distributed(gpu)
@@ -114,9 +116,9 @@ def main(
     learn.to_fp16()
     
     # train
-    if not gpu: print(f"Starting training with max_lr: {max_lr}")
+    if not gpu_rank: print(f"Starting training with max_lr: {max_lr}")
     if imagenet_pretrained:
-        if not gpu: print("Training with transfer learning")
+        if not gpu_rank: print("Training with transfer learning")
         # stage-1
         learn.freeze_to(-1)
         learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
@@ -131,21 +133,24 @@ def main(
         learn.unfreeze()
         learn.fit_one_cycle(epochs, lrs, pct_start=0.8, callbacks=cbs)
     else:
-        if not gpu: print("Training from scratch")
+        if not gpu_rank: print("Training from scratch")
         learn.fit_one_cycle(epochs, max_lr, callbacks=cbs)
         
-    # modelexports
-    if not nan_cb.isnan:
-        if TEST: dtypes = ["Valid", "Test"]
-        else: dtypes = ["Valid"]
+    # preds - https://github.com/NVIDIA/apex/issues/515
+    # model export
+    if (not nan_cb.isnan) and (not gpu_rank):
+        learn.load(f"best_of_{modelname}") # load best model
+        dtypes = ["Valid", "Test"] if TEST else ["Valid"]
         for dtype in dtypes:
-            if not gpu: print(f"Generating Raw Predictions for {dtype}...")
+            if not gpu_rank: print(f"Generating Raw Predictions for {dtype}...")
             ds_type = getattr(DatasetType, dtype)
             preds, targs = learn.get_preds(ds_type)
             ds = learn.data.test_ds if dtype == "Test" else learn.data.valid_ds
             fnames = list(ds.items)
             try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
                      path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
-            if not gpu: print(f"Done.")
+            if not gpu_rank: print(f"Done.")
+        if not gpu_rank: print(f"Exporting learn...")
+        learn.export(f"best_of_{modelname}_export.pkl")
     else:
-        if not gpu: print(f"Skipping Predictions due to NaN.")
+        if not gpu_rank: print(f"Skipping Predictions due to NaN.")

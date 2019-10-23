@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = ["AdamW"]
+__all__ = ["AdamW", "Novograd"]
 
 import torch
 from torch.optim import Optimizer

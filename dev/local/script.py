@@ -28,17 +28,20 @@ def run_command(command, logfn=None):
     else: raise AssertionError("Command should be string or list")
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout = []
+    start_time = _now()
     while True:
         output = process.stdout.readline()
         if output == b'' and process.poll() is not None: break
         if output:
             _out = output.decode(); print(_out.strip())
             stdout.append(_out)
+    end_time = _now()
     rc = process.poll()
     _, stderr =  process.communicate()
     err = stderr.decode(); print(err)
     out = "".join(stdout)
     if logfn:
-        d = {"time": _now(), "command": command, "stderr":err, "stdout":out}
+        d = {"start_time": start_time, "end_time": end_time,
+             "command": command, "stderr":err, "stdout":out}
         _add_dict_to_json(logfn, d)
     return rc
