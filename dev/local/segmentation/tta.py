@@ -49,3 +49,19 @@ def _seg_tta_only_v2(learn:Learner, ds_type:DatasetType=DatasetType.Valid) -> It
     finally: ds.tfms = old
 
 Learner.seg_tta_only_v2 = _seg_tta_only_v2
+
+#Cell
+def _seg_TTA(learn:Learner, ds_type=DatasetType.Valid, updown=False):
+    "Takes average of original, flip_lr and/or flip_ud"
+    if not updown:
+        orig_preds, flip_lr_preds = list(learn.seg_tta_only_v1(ds_type))
+        flip_lr_preds = torch.stack([torch.flip(o, dims=[-1]) for o in flip_lr_preds], dim=0)
+        avg_preds = (orig_preds + flip_lr_preds) / 2
+    else:
+        orig_preds, flip_lr_preds, flip_ud_preds = list(learn.seg_tta_only_v2(ds_type))
+        flip_lr_preds = torch.stack([torch.flip(o, dims=[-1]) for o in flip_lr_preds], dim=0)
+        flip_ud_preds = torch.stack([torch.flip(o, dims=[-2]) for o in flip_ud_preds], dim=0)
+        avg_preds = (orig_preds + flip_lr_preds + flip_ud_preds) / 3
+    return avg_preds
+
+Learner.segTTA = _seg_TTA
