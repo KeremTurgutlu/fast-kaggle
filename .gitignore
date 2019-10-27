@@ -1,6 +1,7 @@
 #project dirs
 steel/
 brain_mets/
+hemorrhage/
 
 # Model files
 *.pth
