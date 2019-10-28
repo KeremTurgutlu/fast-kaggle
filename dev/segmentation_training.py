@@ -8,6 +8,7 @@ from local.segmentation.dataset import *
 from local.segmentation.models import *
 from local.segmentation import metrics
 from local.segmentation import losses_binary, losses_multilabel
+from local.segmentation import tta
 from local.callbacks import *
 from local.optimizers.optimizers import *
 
@@ -45,6 +46,9 @@ def main(
     
     # modelexports
     EXPORT_PATH:Param("Where to export trained model", str)=".",
+    
+    # TTA
+    tta_updown:Param("Whether to do TTA with updown", int)=0,
     
     gpu:Param("GPU to run on, can handle multi gpu", str)=None):
     
@@ -142,13 +146,24 @@ def main(
         learn.load(f"best_of_{modelname}") # load best model
         dtypes = ["Valid", "Test"] if TEST else ["Valid"]
         for dtype in dtypes:
-            if not gpu_rank: print(f"Generating Raw Predictions for {dtype}...")
             ds_type = getattr(DatasetType, dtype)
-            preds, targs = learn.get_preds(ds_type)
             ds = learn.data.test_ds if dtype == "Test" else learn.data.valid_ds
             fnames = list(ds.items)
-            try_save({"fnames":fnames, "preds":to_cpu(preds), "targs":to_cpu(targs)},
-                     path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
+            # raw preds
+            if not gpu_rank: print(f"Generating Raw Predictions for {dtype}...")
+            preds, targs = learn.get_preds(ds_type)
+            try_save({"fnames":fnames,
+                      "preds":to_cpu(preds),
+                      "targs":to_cpu(targs)},
+                      path=Path(EXPORT_PATH), file=f"{dtype}_raw_preds.pkl")
+            # TTA preds
+            if not gpu_rank: print(f"Generating TTA Predictions for {dtype}...")
+            preds = learn.segTTA(ds_type, updown=tta_updown)
+            try_save({"fnames":fnames,
+                      "preds":to_cpu(preds),
+                      "targs":to_cpu(targs)},
+                      path=Path(EXPORT_PATH), file=f"{dtype}_tta_preds.pkl")
+            
             if not gpu_rank: print(f"Done.")
         if not gpu_rank: print(f"Exporting learn...")
         learn.export(f"best_of_{modelname}_export.pkl")

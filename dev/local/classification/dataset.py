@@ -9,7 +9,7 @@ from fastai.vision import *
 class ImageClassificationData:
     "Creates image classification dataset from fastai datablock API"
     def __init__(self,PATH,IMAGES,LABELS,TRAIN,VALID,TEST,
-                 is_multilabel, sample_size,bs,size,**dl_kwargs):
+                 is_multilabel,sample_size,bs,size,**dl_kwargs):
         # input params
         self.path, self.sample_size, self.bs, self.size  = \
         PATH, sample_size, bs, size
