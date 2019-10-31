@@ -69,6 +69,7 @@
   "mask2rle": "16_segmentation_utils.ipynb",
   "rle2mask": "16_segmentation_utils.ipynb",
   "ImageClassificationData": "20_classification_dataset.ipynb",
+  "hemorrhage_bce": "22_classification_metrics.ipynb",
   "EfficientNetB1": "23_classification_models.ipynb",
   "EfficientNetB2": "23_classification_models.ipynb",
   "EfficientNetB3": "23_classification_models.ipynb",

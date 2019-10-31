@@ -9,11 +9,11 @@ from fastai.vision import *
 class ImageClassificationData:
     "Creates image classification dataset from fastai datablock API"
     def __init__(self,PATH,IMAGES,LABELS,TRAIN,VALID,TEST,
-                 is_multilabel,sample_size,bs,size,**dl_kwargs):
+                 sample_size,bs,size,**dl_kwargs):
         # input params
         self.path, self.sample_size, self.bs, self.size  = \
         PATH, sample_size, bs, size
-        self.label_cls = partial(MultiCategoryList, label_delim=";") if is_multilabel else CategoryList
+#         self.label_cls = partial(MultiCategoryList, label_delim=";") if is_multilabel else CategoryList
         self.VALID, self.TEST = VALID, TEST
         self.dl_kwargs = dl_kwargs
 
@@ -31,6 +31,7 @@ class ImageClassificationData:
 
         # read labels
         self.labels_df = pd.read_csv(self.path/LABELS)
+        self.labels_df.iloc[:,1] = self.labels_df.iloc[:,1].apply(lambda o: array(eval(o), dtype=np.float16))
 
         # image folder
         self.path_img = self.path/IMAGES
@@ -43,14 +44,16 @@ class ImageClassificationData:
         else:
             self.train_valid_df = self.train_df
 
+#         import pdb; pdb.set_trace()
         # get
-        il = SegmentationItemList.from_df(self.train_valid_df, self.path_img)
+        il = ImageList.from_df(self.train_valid_df, self.path_img)
         # split
         if self.valid_file: ill = il.split_from_df("is_valid")
         else: ill = il.split_by_rand_pct(ifnone(self.VALID, 0.2))
         # label
         labels_dict = dict(zip(self.labels_df.iloc[:,0], self.labels_df.iloc[:,1]))
-        ll = ill.label_from_func(lambda o: labels_dict[Path(o).name], label_cls=self.label_cls)
+
+        ll = ill.label_from_func(lambda o: labels_dict[Path(o).name], label_cls=FloatList)
         # databunch
         data = (ll.transform(get_transforms(),
                              size=self.size,
